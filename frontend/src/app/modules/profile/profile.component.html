@@ -1,0 +1,16 @@
+<div class="profile-container">
+    <div class="profile-info">
+        <div class="profile-photo">
+            <img [src]="photo_url" alt="{{ activePlayer?.name }}'s Photo" />
+        </div>
+        <div class="profile-details">
+            <h2>{{ activePlayer?.name }}</h2>
+            <p>Points: {{ activePlayer?.points }}</p>
+            <p>Level: {{ activePlayer?.level?.name }}</p>
+        </div>
+    </div>
+    <div class="daily-tip">
+        <h3><i class="pi pi-star" style="color: slateblue"></i> Daily Tip <i class="pi pi-star" style="color: slateblue"></i></h3>
+        <p>{{ dailyTip }}</p>
+    </div>
+</div>

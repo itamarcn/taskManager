@@ -1,0 +1,22 @@
+.header {
+    font-family: cursive, sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    background-image: linear-gradient(to left, #553c9a, #b393d3);
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    margin: 0;
+}
+
+.header-title {
+    display: flex;
+}
+
+p-avatar {
+    cursor: pointer;
+}
+
+:host ::ng-deep .p-menubar {
+    padding: 8px 25px;
+}

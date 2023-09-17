@@ -1,0 +1,67 @@
+.add-button {
+    border-color: #b2cbb2;
+    background-color: #daf3da;
+    color: #388538;
+
+    .p-button-ink {
+        display: none !important;
+    }
+
+    &:hover {
+        background-color: #388538;
+        color: #daf3da;
+    }
+
+    &:enabled:focus {
+        box-shadow: none;
+    }
+}
+
+.edit-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.title {
+    font-weight: 600;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.text-danger {
+    color: rgb(165, 20, 20);
+}
+
+.text-level {
+    align-self: center;
+    padding-left: 10px;
+    border-left: 1px solid #ababab;
+    margin-left: 10px;
+    font-size: large;
+    font-weight: 600;
+    color: black;
+}
+
+:host ::ng-deep {
+    .p-paginator {
+        border: 1px solid #e3e3e3;
+        border-radius: 0;
+    }
+    
+    .p-dialog .p-dialog-footer {
+        padding: 20px 0 0 0;
+    }
+
+    .p-field {
+        padding: 5px 0;
+    }
+}
+
+.btn-complete {
+    margin-left: 10px;
+}

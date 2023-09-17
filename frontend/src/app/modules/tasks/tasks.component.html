@@ -1,0 +1,182 @@
+<div *ngIf="isLoading; else table">
+    <p-table [value]="skeletonTasks" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Due date</th>
+                <th>Points</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-task>
+            <tr>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+                <td><p-skeleton></p-skeleton></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+<ng-template #table>
+    <p-toast></p-toast>
+    <p-table styleClass="p-datatable-gridlines"
+        dataKey="id"
+        editMode="row"
+        [value]="unlockedTasks"
+        [frozenValue]="lockedTasks"
+        [paginator]="true"
+        [rows]="7"
+        [(selection)]="selectedTasks"
+        [selectionPageOnly]="true"
+        [showCurrentPageReport]="true"
+        [responsive]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} tasks"
+        (onHeaderCheckboxToggle)="handleHeaderCheckboxToggle($event)">
+        <ng-template pTemplate="caption">
+            <div class="header-container">
+                <div class="flex">
+                    <button type="button" pButton pRipple class="p-button-rounded p-button-success add-button" icon="pi pi-plus" (click)="addTask()"></button>
+                    <p-dialog header="Add New Task" [(visible)]="addTaskDialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [style]="{ width: '25vw' }">
+                        <form [formGroup]="taskForm" (ngSubmit)="onAddTaskSubmit()">
+                            <div class="p-fluid">
+                                <div class="p-field">
+                                    <label for="title">Title*</label>
+                                    <input type="text" id="title" formControlName="title" pInputText [class.ng-invalid]="isFieldInvalid('title')" />
+                                    <small *ngIf="isFieldInvalid('title')" class="text-danger">*Title is required</small>
+                                </div>
+                                <div class="p-field">
+                                    <label for="dueDate">Due Date*</label>
+                                    <p-calendar id="dueDate" formControlName="date" appendTo="body" [showIcon]="true" [minDate]="minDate" dateFormat="dd.mm.yy" [class.ng-invalid]="isFieldInvalid('date')"></p-calendar>
+                                    <small *ngIf="isFieldInvalid('date')" class="text-danger">*Due Date is required</small>
+                                </div>
+                                <div class="p-field">
+                                    <label for="points">Points*</label>
+                                    <input type="number" id="points" formControlName="points" pInputText [class.ng-invalid]="isFieldInvalid('points')" />
+                                    <small *ngIf="isFieldInvalid('points')" class="text-danger">*Points is required</small>
+                                </div>
+                                <div class="p-field">
+                                    <label for="difficulty">Difficulty*</label>
+                                    <p-dropdown
+                                      id="difficulty"
+                                      [options]="difficultyEnumValues"
+                                      formControlName="difficulty"
+                                      [class.ng-invalid]="isFieldInvalid('difficulty')"
+                                      appendTo="body"
+                                    ></p-dropdown>
+                                    <small *ngIf="isFieldInvalid('difficulty')" class="text-danger">*Difficulty is required</small>
+                                  </div>
+                                <div class="p-field">
+                                    <label for="description">Description</label>
+                                    <input type="text" id="description" formControlName="description" pInputText [class.ng-invalid]="isFieldInvalid('description')" />
+                                    <small *ngIf="isFieldInvalid('description')" class="text-danger">*Description is required</small>
+                                </div>
+                            </div>
+                            <div class="p-dialog-footer">
+                                <button pButton type="button" label="Cancel" (click)="onAddTaskCancel()"></button>
+                                <button pButton type="submit" label="Add" [disabled]="taskForm.invalid" class="p-button-success"></button>
+                            </div>
+                        </form>
+                    </p-dialog>
+                    <span class="text-level">Level: {{ activePlayer?.level?.num }}</span>
+                    <span *ngIf="currentLevel?.pointsRequiredForNextLevel; else maxLevel" class="text-level">Points: {{ activePlayer?.points }} / {{ currentLevel?.pointsRequiredForNextLevel }}</span>
+                    <ng-template #maxLevel><span class="text-level">Points(max level): {{ activePlayer?.points }}</span></ng-template>
+                </div>
+                <button *ngIf="selectedTasks.length" type="button" pButton pRipple class="p-button-rounded p-button-success btn-complete" (click)="onCompleteTasks(activePlayer?.id, selectedTasks)">Complete tasks</button>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Select</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Due date</th>
+                <th>Points</th>
+                <th>Difficulty</th>
+                <th>Status</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-task let-editing="editing" let-ri="rowIndex">
+            <tr [pEditableRow]="task">
+                <td>
+                    <p-tableCheckbox [value]="task" [disabled]="editing || task.status === doneStatus"></p-tableCheckbox>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <input pInputText type="text" [(ngModel)]="task.title">
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            <span class="title">{{ task.title }}</span>
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <input pInputText type="text" [(ngModel)]="task.description">
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            {{ task.description }}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <p-calendar [(ngModel)]="selectedDate" appendTo="body" [showIcon]="true" [minDate]="minDate" dateFormat="dd.mm.yy"></p-calendar>
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            {{ task.date | date:'dd.MM.yyyy' }}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <input pInputText type="number" [(ngModel)]="task.points">
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            {{ task.points }}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <p-dropdown [options]="difficultyEnumValues" [(ngModel)]="task.difficulty"></p-dropdown>
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            <p-tag [value]="task.difficulty" [severity]="getDifficultyColor(task.difficulty)"></p-tag>
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <p-dropdown [options]="statusEnumValues" [(ngModel)]="task.status"></p-dropdown>
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            <p-tag [value]="task.status" [severity]="getStatusColor(task.status)"></p-tag>
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <div class="edit-buttons">
+                        <button *ngIf="!editing && !(task.status === doneStatus)" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(task)" class="p-button-rounded p-button-text"></button>
+                        <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(task)" class="p-button-rounded p-button-text p-button-success mr-2"></button>
+                        <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(task, ri)" class="p-button-rounded p-button-text p-button-danger"></button>
+                    </div>
+                </td>
+                <td>
+                    <div class="edit-buttons">
+                        <p-confirmPopup></p-confirmPopup>
+                        <p-button pRipple type="button" icon="pi pi-trash" (click)="onRowDelete($event, task, ri)"></p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</ng-template>
